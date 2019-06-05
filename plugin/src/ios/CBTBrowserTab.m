@@ -20,6 +20,22 @@
   SFSafariViewController *_safariViewController;
 }
 
+- (void)pluginInitialize
+{
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationLaunchedWithUrl:) name:CDVPluginHandleOpenURLNotification object:nil];
+}
+
+- (void)applicationLaunchedWithUrl:(NSNotification*)notification
+{
+    // Close the browser tab if the app custom url scheme is navigated to
+    // When using wkwebview-engine cordova js is backgrounded so we cannot listen for this event and close the browser tab using js
+    if (!_safariViewController) {
+        return;
+    }
+    [_safariViewController dismissViewControllerAnimated:YES completion:nil];
+    _safariViewController = nil;
+}
+
 - (void)isAvailable:(CDVInvokedUrlCommand *)command {
   BOOL available = ([SFSafariViewController class] != nil);
   CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
